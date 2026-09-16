@@ -53,7 +53,7 @@ metadata:
     # 경로 재작성: 백앤드로 연결시 경로를 바꿔줍니다.
     # Nginx Ingress Controller 사용시: nginx.ingress.kubernetes.io/rewrite-target: /
     # alb.ingress.kubernetes.io/transforms.<service-name>: >
-    alb.ingress.kubernetes.io/transforms.nginx-service: >
+    alb.ingress.kubernetes.io/transforms.nginx-svc: >
       [
         {
           "type": "url-rewrite",
@@ -76,7 +76,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nginx-service   # Kubernetes Service Name
+                name: nginx-svc   # Kubernetes Service Name
                 port:
                   number: 80
           # - path: /api      # fastAPI: main.py의 # app = FastAPI(root_path="/api")
