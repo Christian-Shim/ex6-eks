@@ -25,10 +25,64 @@ metadata:
   name: nginx-svc
   namespace: default
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: nginx-web-label
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alb-base-ingress
+  annotations:  # 보안 그룹 등 AWS에 대한 설정들
+    # 보안 그룹 설정: alb.ingress.kubernetes.io/security-groups: id, id, ...
+    alb.ingress.kubernetes.io/security-groups: sg-0cb5c3fa831425c55
+    # internet-facing: 외부로드밸런서(IP 부여), internet(내부)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # ip(Pod의 IP로 트래픽 전달)
+    # instance: EC2인스턴스를 대상으로 하는 타겟 그룹 생성
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # HTTPS 인증서 정의: alb.ingress.kubernetes.io/certificate-arn: <인증서ARN>
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:925047940866:certificate/3cdf7a32-d671-47bf-8704-32299f48fb51
+    # HTTP접속 시 HTTPS로 리다이렉션(선택사항, 권장)
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    # 경로 재작성: 백앤드로 연결시 경로를 바꿔줍니다.
+    # Nginx Ingress Controller 사용시: nginx.ingress.kubernetes.io/rewrite-target: /
+    # alb.ingress.kubernetes.io/transforms.<service-name>: >
+    alb.ingress.kubernetes.io/transforms.nginx-service: >
+      [
+        {
+          "type": "url-rewrite",
+          "urlRewriteConfig": {
+            "rewrites": [
+              {
+                "regex": "^\\/nginx(?:\\/(.*))?$",
+                "replace": "/$1"
+              }
+            ]
+          }
+        }
+      ]
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /nginx
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service   # Kubernetes Service Name
+                port:
+                  number: 80
+          # - path: /api      # fastAPI: main.py의 # app = FastAPI(root_path="/api")
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: <service_name>
+          #       port:
+          #         number: 8000
