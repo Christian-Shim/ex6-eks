@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-web-label
+  template:
+    metadata:
+      labels:
+        app: nginx-web-label
+    spec:
+      containers:
+        - name: nginx-container
+          image: christian-shim/nginx:1.31.3-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-web-label
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
