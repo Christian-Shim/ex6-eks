@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nginx-container
-          image: vincent102/nginx:1.31.3-alpine
+          image: vincent102/nginx:52f6f17c2823ff77beb94780e181cef96cb306f9
           ports:
             - containerPort: 80
 ---
