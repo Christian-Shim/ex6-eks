@@ -23,13 +23,13 @@ jobs:
           context: .
           file: ./nginx/Dockerfile # 사용자가 지정할 수 있는 경로 및 파일명
           push: true
-          tags: christian-shim/nginx:${{ github.sha }} # (중요)이미지명 정의(태그 자동생성)
+          tags: vincent102/nginx:${{ github.sha }} # (중요)이미지명 정의(태그 자동생성)
       - name: 쿠버네티스 파일의 이미지 태그 갱신 및 Git push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          sed -i 's|image: christian-shim/nginx:.*|image: christian-shim/nginx:${{ github.sha }}|g' ./k8s/deployment.yaml
+          sed -i 's|image: vincent102/nginx:.*|image: vincent102/nginx:${{ github.sha }}|g' ./k8s/deployment.yaml
 
           git add ./k8s/deployment.yaml
           git commit -m "Deployment file tag Update(${{ github.sha }})"
